@@ -1,0 +1,1 @@
+{"uuid":"8f36449b-9c6a-4c05-94ee-c3892d34eede","name":"Login com credenciais válidas deve retornar token (200)","children":["c0e35c07-f3ae-4a69-90ff-8ee20c86ece6"],"befores":[],"afters":[],"start":1762518120744,"stop":1762518122664}

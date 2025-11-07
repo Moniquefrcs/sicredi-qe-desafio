@@ -1,0 +1,1 @@
+{"uuid":"0d8913f5-d93a-4eb4-b8d3-f1f06cc45751","name":"Login com credenciais inválidas deve retornar erro 400","children":["68f4b07e-9b45-4583-8130-ac26aea16e0a"],"befores":[],"afters":[],"start":1762518348627,"stop":1762518348916}
