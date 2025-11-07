@@ -1,50 +1,65 @@
 package com.sicredi.api.utils;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+
+import static io.restassured.RestAssured.given;
 
 public class AuthUtils {
 
-    private static final String TOKEN_PATH = "src/test/resources/token.txt";
+    private static String token;
 
     /**
-     * Salva o token em um arquivo para ser usado nos próximos testes.
+     * Retorna o token de autenticação.
+     * Se ainda não existir, faz o login em /auth/login e guarda em memória.
      */
-    public static void setToken(String token) {
-        try {
-            // Garante que a pasta exista
-            File file = new File(TOKEN_PATH);
-            file.getParentFile().mkdirs(); // cria src/test/resources se não existir
-
-            // Escreve o token no arquivo
-            FileWriter writer = new FileWriter(file);
-            writer.write(token);
-            writer.close();
-
-            System.out.println("🔐 Token armazenado com sucesso!");
-        } catch (IOException e) {
-            System.err.println("❌ Erro ao salvar o token: " + e.getMessage());
+    public static String getToken() {
+        if (token == null || token.isEmpty()) {
+            token = loginAndGetToken();
         }
+        return token;
     }
 
     /**
-     * Lê o token salvo do arquivo.
+     * Realiza o login em POST /auth/login e devolve o token (campo "accessToken" ou "token").
      */
-    public static String getToken() {
-        try {
-            if (Files.exists(Paths.get(TOKEN_PATH))) {
-                String token = new String(Files.readAllBytes(Paths.get(TOKEN_PATH)));
-                System.out.println("🪪 Token carregado para o teste: " + token);
-                return token;
-            } else {
-                System.out.println("⚠️ Nenhum token encontrado. Execute o AuthTest primeiro!");
-            }
-        } catch (IOException e) {
-            System.err.println("❌ Erro ao ler o token: " + e.getMessage());
+    private static String loginAndGetToken() {
+
+        // Garante baseURI caso não tenha sido setado por BaseTest
+        if (RestAssured.baseURI == null || RestAssured.baseURI.isEmpty()) {
+            RestAssured.baseURI = "https://dummyjson.com";
         }
-        return null;
+
+        String body = """
+            {
+                "username": "emilys",
+                "password": "emilyspass"
+            }
+            """;
+
+        Response response = given()
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when()
+                .post("/auth/login")
+                .then()
+                // não travamos o teste no status aqui, apenas extraímos
+                .extract()
+                .response();
+
+        // tenta primeiro accessToken, depois token (para ser compatível com a doc atual)
+        String accessToken = response.jsonPath().getString("accessToken");
+        String token = accessToken;
+
+        if (token == null || token.isEmpty()) {
+            token = response.jsonPath().getString("token");
+        }
+
+        if (token == null || token.isEmpty()) {
+            throw new RuntimeException("Falha ao obter token em /auth/login. Resposta: " + response.asString());
+        }
+
+        return token;
     }
 }
