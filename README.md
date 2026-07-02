@@ -48,8 +48,10 @@ O projeto foi organizado em camadas para separar responsabilidades:
 
 ## Pre-requisitos
 
+- Git
 - Java 17+
 - Maven 3.9+
+- Conta no GitLab, caso a entrega siga o formato oficial do desafio
 - Acesso a internet para consumir `https://dummyjson.com`
 
 ## Como executar
