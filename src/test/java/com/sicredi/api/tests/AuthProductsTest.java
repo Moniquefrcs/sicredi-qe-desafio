@@ -7,14 +7,16 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.*;
 import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
 public class AuthProductsTest extends BaseTest {
 
     @Test
-    @DisplayName("Deve listar produtos autenticados com token válido")
-    @Description("GET /auth/products - Sucesso com token válido")
+    @DisplayName("Deve listar produtos autenticados com token valido")
+    @Description("GET /auth/products - Sucesso com token valido")
     void deveListarProdutosAutenticadosComSucesso() {
         String token = AuthUtils.getToken();
 
@@ -31,20 +33,19 @@ public class AuthProductsTest extends BaseTest {
     }
 
     @Test
-    @DisplayName("Não deve permitir acesso sem token")
-    @Description("GET /auth/products - Fluxo de exceção sem Authorization")
+    @DisplayName("Nao deve permitir acesso sem token")
+    @Description("GET /auth/products - Fluxo de excecao sem Authorization")
     void naoDevePermitirAcessoSemToken() {
         given()
                 .when()
                 .get("/auth/products")
                 .then()
-                // aceita 401 ou 403 (dependendo de como o backend trata)
                 .statusCode(anyOf(is(401), is(403)));
     }
 
     @Test
-    @DisplayName("Não deve permitir acesso com token inválido")
-    @Description("GET /auth/products - Fluxo de exceção com token inválido")
+    @DisplayName("Nao deve permitir acesso com token invalido")
+    @Description("GET /auth/products - Fluxo de excecao com token invalido")
     void naoDevePermitirAcessoComTokenInvalido() {
         given()
                 .header("Authorization", "Bearer token-invalido")

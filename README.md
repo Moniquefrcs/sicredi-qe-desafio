@@ -1,236 +1,101 @@
-# 🧪 Desafio Técnico QE – Sicredi
+# Sicredi QE Desafio - Testes Automatizados de API
 
-Projeto de testes automatizados de API desenvolvido em **Java** para validação da API de gestão de produtos eletrônicos (baseada na [DummyJSON](https://dummyjson.com)).
+Projeto de testes automatizados para a API publica [DummyJSON](https://dummyjson.com), desenvolvido em Java 17 com Maven, JUnit 5, Rest Assured e Allure.
 
----
+O objetivo e demonstrar uma estrategia objetiva de automacao de API, cobrindo fluxos positivos, fluxos de excecao, autenticacao e validacoes de contrato basicas.
 
-## 🎯 Objetivo
+## Tecnologias
 
-O objetivo deste desafio é demonstrar habilidades em **testes de API** utilizando boas práticas de automação, cobrindo fluxos funcionais e de exceção de todos os endpoints definidos na documentação.
+- Java 17
+- Maven
+- JUnit 5
+- Rest Assured
+- Hamcrest
+- Allure Reports
+- GitHub Actions
 
-O projeto garante que a aplicação esteja funcionando conforme esperado e identifica possíveis bugs e melhorias.
+## Estrutura
 
----
+```text
+.
+|-- .github/workflows/tests.yml
+|-- pom.xml
+|-- README.md
+`-- src/test/java/com/sicredi/api
+    |-- base/BaseTest.java
+    |-- utils/AuthUtils.java
+    `-- tests
+        |-- AuthTest.java
+        |-- AuthProductsTest.java
+        |-- HealthCheckTest.java
+        |-- ProductByIdTest.java
+        |-- ProductsAddTest.java
+        |-- ProductsTest.java
+        |-- UserTest.java
+        `-- UsersTest.java
+```
 
-## 🔧 Tecnologias Utilizadas
+## Pre-requisitos
 
-- ☕ **Java 17**
-- 🧰 **Maven**
-- 🧪 **JUnit 5**
-- 🌐 **Rest Assured**
-- 📊 **Allure Reports** (bônus – geração automática de relatórios)
-- 🧱 **GitLab CI** (bônus – pipeline configurado)
+- Java 17+
+- Maven 3.9+
+- Acesso a internet para consumir `https://dummyjson.com`
 
----
+## Como executar
 
-## 📁 Estrutura do Projeto
-
-sicredi-qe-desafio
-├─ pom.xml
-├─ .gitlab-ci.yml
-├─ README.md
-└─ src
-└─ test
-├─ java
-│ └─ com.sicredi.api
-│ ├─ base
-│ │ └─ BaseTest.java
-│ ├─ utils
-│ │ └─ AuthUtils.java
-│ └─ tests
-│ ├─ AuthTest.java
-│ ├─ UserTest.java
-│ ├─ UsersTest.java
-│ ├─ HealthCheckTest.java
-│ ├─ AuthProductsTest.java
-│ ├─ ProductsTest.java
-│ ├─ ProductByIdTest.java
-│ └─ ProductsAddTest.java
-└─ resources
-└─ (caso seja necessário)
-
-
----
-
-## ▶️ Como Executar o Projeto
-
-### 🧩 Pré-requisitos
-
-- Java 11+ (recomendado Java 17)
-- Maven instalado
-- Acesso à internet (API DummyJSON é pública)
-
-### 🚀 Executar todos os testes
-
-Na raiz do projeto:
+Executar todos os testes:
 
 ```bash
 mvn clean test
+```
 
-📊 Gerar relatório Allure (bônus)
+Executar apontando para outra URL base:
 
-Após executar os testes, para gerar o relatório de execução:
+```bash
+mvn clean test -Dbase.url=https://dummyjson.com
+```
 
+Executar com outro usuario da API:
+
+```bash
+mvn clean test -Dapi.username=emilys -Dapi.password=emilyspass
+```
+
+Gerar/abrir relatorio Allure:
+
+```bash
 mvn allure:serve
+```
 
+Os resultados de execucao sao gerados em `target/allure-results` e nao sao versionados.
 
-Isso abrirá automaticamente o dashboard do Allure no navegador, exibindo todos os cenários, tempos de execução e logs detalhados.
+## Cobertura automatizada
 
-🧪 Estratégia e Plano de Testes
+| Endpoint | Cenarios |
+| --- | --- |
+| `GET /test` | Verifica disponibilidade da API |
+| `GET /users` | Lista usuarios disponiveis para autenticacao |
+| `POST /auth/login` | Login com credenciais validas e rejeicao de credenciais invalidas |
+| `GET /auth/me` | Consulta perfil com token valido |
+| `GET /auth/products` | Lista produtos autenticados, rejeita acesso sem token e com token invalido |
+| `GET /products` | Lista produtos e valida estrutura basica |
+| `GET /products/{id}` | Consulta produto existente e valida erro para produto inexistente |
+| `POST /products/add` | Cria produto e valida campos retornados |
 
-Os testes estão estruturados por endpoint, garantindo organização, legibilidade e reuso.
+## Boas praticas aplicadas
 
-🔹 Estrutura Base
+- Reuso de configuracao comum em `BaseTest`.
+- Centralizacao de autenticacao em `AuthUtils`.
+- Base URL e credenciais configuraveis por propriedades Maven.
+- Validacoes objetivas de status code e campos relevantes do body.
+- Testes negativos para autenticacao e acesso protegido.
+- Sem token, resultados de teste ou arquivos de IDE versionados.
+- Pipeline de CI executando `mvn -B clean test` a cada push ou pull request na branch `main`.
 
-BaseTest: configura a baseURI e o Content-Type.
+## Observacoes sobre a API
 
-AuthUtils: realiza o login e centraliza a obtenção do token.
+A DummyJSON e uma API publica de apoio a testes. Alguns comportamentos podem diferir de APIs produtivas, por exemplo aceitar `200` em criacoes simuladas ou retornar codigos diferentes conforme a regra interna do servico. Os testes foram escritos para validar o comportamento atual documentado/observado sem mascarar falhas de autenticacao.
 
-Testes individuais: um arquivo por endpoint.
-
-🔹 Estratégia de Cobertura
-Endpoint	Cenários Implementados	Tipo
-GET /test	Verificar se API responde com sucesso	Sucesso
-GET /users	Retornar lista de usuários	Sucesso
-POST /auth/login	Autenticar usuário e obter token	Sucesso
-GET /auth/me	Obter perfil do usuário autenticado	Sucesso
-GET /auth/products	Listar produtos autenticados	Sucesso / Erro
-POST /products/add	Criar produto	Sucesso
-GET /products	Listar todos os produtos	Sucesso
-GET /products/{id}	Consultar produto existente e inexistente	Sucesso / Erro
-🧩 Cenários de Teste Detalhados
-✅ 1. GET /test
-
-Verifica se a API está online.
-
-Quando: chamada GET /test
-
-Então: status code 200 e body não nulo.
-
-✅ 2. GET /users
-
-Lista os usuários disponíveis para autenticação.
-
-Então: status 200 e campos id, username, password.
-
-✅ 3. POST /auth/login
-
-Realiza login com credenciais válidas.
-
-Então: status 200 e retorno de token válido.
-
-✅ 4. GET /auth/me
-
-Retorna o perfil autenticado.
-
-Dado: token obtido no login
-
-Quando: chamada GET /auth/me
-
-Então: status 200 e campos username, email.
-
-✅ 5. GET /auth/products
-
-Com token válido: status 200, lista de produtos.
-
-Sem token: erro 401 ou 403.
-
-Com token inválido: erro 401 ou 403.
-
-✅ 6. POST /products/add
-
-Cria um produto com sucesso.
-
-Quando: enviar payload válido
-
-Então: status 200 ou 201 e produto com id, title, price, stock.
-
-✅ 7. GET /products
-
-Lista todos os produtos.
-
-Então: status 200 e products.size() > 0.
-
-✅ 8. GET /products/{id}
-
-Com ID existente: status 200 e id = 1.
-
-Com ID inexistente: retorno 4xx (erro tratado).
-
-📋 Boas Práticas Aplicadas
-
-Reuso de código e dados via BaseTest e AuthUtils
-
-Métodos e nomes de teste descritivos
-
-Cobertura de fluxos positivos e negativos
-
-Organização por endpoint
-
-Documentação detalhada e clara no README
-
-🧩 Critérios do Desafio Atendidos
-Critério	Situação
-Java como linguagem	✅
-Boas práticas de desenvolvimento	✅
-Cobertura funcional e de exceção	✅
-Scripts claros e legíveis	✅
-Documentação README completa	✅
-Relatório automático (Allure)	⚙️ (Bônus configurado)
-Pipeline GitLab configurado	⚙️ (Bônus configurado)
-🐛 Bugs Encontrados
-
-Durante a execução dos testes, foram observadas pequenas inconsistências entre documentação e comportamento real da API DummyJSON:
-
-POST /auth/login retorna 200 em vez de 201 (documentação).
-
-POST /products/add às vezes aceita payload incompleto (sem validação de campos obrigatórios).
-
-GET /products/{id} retorna 400 em vez de 404 para ID inexistente.
-
-Esses comportamentos foram documentados como melhorias e não afetam o sucesso do desafio.
-
-💡 Melhorias Sugeridas
-
-Padronizar códigos de status HTTP
-→ Usar 401 para token inválido e 403 para ausência de token.
-
-Melhorar validação de payloads
-→ Rejeitar POST /products/add com campos obrigatórios faltando.
-
-Melhorar documentação da API
-→ Incluir exemplos de resposta e estrutura de erro padronizada.
-
-⚙️ Integração Contínua (CI) – Bônus
-
-Um pipeline simples foi configurado para execução automática dos testes no GitLab CI/CD.
-
-Arquivo .gitlab-ci.yml
-image: maven:3.9-eclipse-temurin-17
-
-stages:
-  - test
-
-variables:
-  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
-
-cache:
-  paths:
-    - .m2/repository
-    - target
-
-test-api:
-  stage: test
-  script:
-    - mvn -B clean test
-  artifacts:
-    when: always
-    paths:
-      - target/surefire-reports
-      - allure-results
-    expire_in: 7 days
-
-👤 Autora
+## Autora
 
 Monique Fernandes Ribeiro C. S.
-Analista de Qualidade de Software (QE)

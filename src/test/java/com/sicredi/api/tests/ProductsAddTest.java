@@ -6,16 +6,17 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.*;
 import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
 public class ProductsAddTest extends BaseTest {
 
     @Test
     @DisplayName("Deve criar um produto com sucesso")
-    @Description("POST /products/add - Criação de produto")
+    @Description("POST /products/add - Criacao de produto")
     void deveCriarProdutoComSucesso() {
-
         String body = """
             {
               "title": "Perfume Oil",
@@ -26,7 +27,7 @@ public class ProductsAddTest extends BaseTest {
               "stock": 65,
               "brand": "Impression of Acqua Di Gio",
               "category": "fragrances",
-              "thumbnail": "https://i.dummyjson.com/data/products/11/thumnail.jpg"
+              "thumbnail": "https://i.dummyjson.com/data/products/11/thumbnail.jpg"
             }
             """;
 
@@ -35,7 +36,6 @@ public class ProductsAddTest extends BaseTest {
                 .when()
                 .post("/products/add")
                 .then()
-                // aceita 200 ou 201 (documentação x comportamento real)
                 .statusCode(anyOf(is(200), is(201)))
                 .body("id", notNullValue())
                 .body("title", equalTo("Perfume Oil"))

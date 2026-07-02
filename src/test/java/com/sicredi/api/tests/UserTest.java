@@ -14,10 +14,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class UserTest extends BaseTest {
 
     @Test
-    @DisplayName("Deve acessar o perfil do usuário autenticado com sucesso")
-    @Description("GET /auth/me - Perfil com token válido")
+    @DisplayName("Deve acessar o perfil do usuario autenticado com sucesso")
+    @Description("GET /auth/me - Perfil com token valido")
     void deveAcessarPerfilComTokenValido() {
-
         String token = AuthUtils.getToken();
 
         Response response = given()
@@ -28,7 +27,7 @@ public class UserTest extends BaseTest {
                 .extract()
                 .response();
 
-        assertEquals(200, response.statusCode(), "A requisição deveria retornar 200 OK");
+        assertEquals(200, response.statusCode(), "A requisicao deveria retornar 200 OK");
         assertNotNull(response.jsonPath().getString("username"));
         assertNotNull(response.jsonPath().getString("email"));
     }
