@@ -1,20 +1,27 @@
 package com.sicredi.api.tests;
 
+import com.sicredi.api.clients.AuthClient;
 import com.sicredi.api.base.BaseTest;
+import com.sicredi.api.payloads.LoginPayloadFactory;
+import com.sicredi.api.specs.ApiSpecs;
 import com.sicredi.api.utils.AuthUtils;
 import io.qameta.allure.Description;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Tag("auth")
 public class AuthTest extends BaseTest {
 
+    private final AuthClient authClient = new AuthClient();
+
     @Test
+    @Tag("smoke")
     @DisplayName("Deve realizar login com sucesso e retornar um token valido")
     @Description("POST /auth/login - Login com credenciais validas")
     void loginComSucesso() {
@@ -25,15 +32,13 @@ public class AuthTest extends BaseTest {
     }
 
     @Test
+    @Tag("regression")
     @DisplayName("Nao deve autenticar com credenciais invalidas")
     @Description("POST /auth/login - Fluxo de excecao com senha invalida")
     void naoDeveAutenticarComCredenciaisInvalidas() {
-        given()
-                .body(AuthUtils.loginPayload("emilys", "senha-invalida"))
-                .when()
-                .post("/auth/login")
+        authClient.login(LoginPayloadFactory.invalidPassword())
                 .then()
-                .statusCode(400)
+                .spec(ApiSpecs.clientError())
                 .body("message", not(emptyOrNullString()));
     }
 }

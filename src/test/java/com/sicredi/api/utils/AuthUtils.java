@@ -1,16 +1,13 @@
 package com.sicredi.api.utils;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
+import com.sicredi.api.clients.AuthClient;
+import com.sicredi.api.payloads.LoginPayloadFactory;
+import com.sicredi.api.specs.ApiSpecs;
 import io.restassured.response.Response;
-
-import static io.restassured.RestAssured.given;
 
 public class AuthUtils {
 
-    private static final String DEFAULT_BASE_URL = "https://dummyjson.com";
-    private static final String DEFAULT_USERNAME = "emilys";
-    private static final String DEFAULT_PASSWORD = "emilyspass";
+    private static final AuthClient AUTH_CLIENT = new AuthClient();
 
     private static String token;
 
@@ -22,30 +19,10 @@ public class AuthUtils {
         return token;
     }
 
-    public static String loginPayload(String username, String password) {
-        return """
-            {
-                "username": "%s",
-                "password": "%s"
-            }
-            """.formatted(username, password);
-    }
-
     private static String loginAndGetToken() {
-        if (RestAssured.baseURI == null || RestAssured.baseURI.isBlank()) {
-            RestAssured.baseURI = System.getProperty("base.url", DEFAULT_BASE_URL);
-        }
-
-        String username = System.getProperty("api.username", DEFAULT_USERNAME);
-        String password = System.getProperty("api.password", DEFAULT_PASSWORD);
-
-        Response response = given()
-                .contentType(ContentType.JSON)
-                .body(loginPayload(username, password))
-                .when()
-                .post("/auth/login")
+        Response response = AUTH_CLIENT.login(LoginPayloadFactory.valid())
                 .then()
-                .statusCode(200)
+                .spec(ApiSpecs.ok())
                 .extract()
                 .response();
 

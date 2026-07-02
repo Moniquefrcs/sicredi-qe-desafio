@@ -1,42 +1,42 @@
 package com.sicredi.api.tests;
 
+import com.sicredi.api.clients.ProductsClient;
 import com.sicredi.api.base.BaseTest;
+import com.sicredi.api.specs.ApiSpecs;
 import io.qameta.allure.Description;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import static io.restassured.RestAssured.given;
+import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.notNullValue;
 
+@Tag("products")
 public class ProductByIdTest extends BaseTest {
 
+    private final ProductsClient productsClient = new ProductsClient();
+
     @Test
+    @Tag("smoke")
     @DisplayName("Deve retornar produto existente pelo ID")
     @Description("GET /products/{id} - Sucesso")
     void deveRetornarProdutoExistentePorId() {
-        given()
-                .pathParam("id", 1)
-                .when()
-                .get("/products/{id}")
+        productsClient.findById(1)
                 .then()
-                .statusCode(200)
+                .spec(ApiSpecs.ok())
+                .body(matchesJsonSchemaInClasspath("schemas/product.schema.json"))
                 .body("id", equalTo(1))
                 .body("title", notNullValue());
     }
 
     @Test
+    @Tag("regression")
     @DisplayName("Deve retornar erro para produto inexistente")
     @Description("GET /products/{id} - Fluxo de excecao para ID invalido")
     void deveRetornarErroParaProdutoInexistente() {
-        given()
-                .pathParam("id", 0)
-                .when()
-                .get("/products/{id}")
+        productsClient.findById(0)
                 .then()
-                .statusCode(greaterThanOrEqualTo(400))
-                .statusCode(lessThan(500));
+                .spec(ApiSpecs.clientError());
     }
 }

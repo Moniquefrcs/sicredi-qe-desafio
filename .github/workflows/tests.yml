@@ -10,6 +10,14 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        suite:
+          - name: smoke
+            command: mvn -B test -Dgroups=smoke
+          - name: regression
+            command: mvn -B clean test
 
     steps:
       - name: Checkout
@@ -22,14 +30,14 @@ jobs:
           java-version: "17"
           cache: maven
 
-      - name: Run automated API tests
-        run: mvn -B clean test
+      - name: Run ${{ matrix.suite.name }} API tests
+        run: ${{ matrix.suite.command }}
 
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-reports
+          name: test-reports-${{ matrix.suite.name }}
           path: |
             target/surefire-reports
             target/allure-results

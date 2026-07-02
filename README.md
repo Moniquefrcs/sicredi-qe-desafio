@@ -2,7 +2,7 @@
 
 Projeto de testes automatizados para a API publica [DummyJSON](https://dummyjson.com), desenvolvido em Java 17 com Maven, JUnit 5, Rest Assured e Allure.
 
-O objetivo e demonstrar uma estrategia objetiva de automacao de API, cobrindo fluxos positivos, fluxos de excecao, autenticacao e validacoes de contrato basicas.
+O objetivo e demonstrar uma estrategia objetiva de automacao de API, cobrindo fluxos positivos, fluxos de excecao, autenticacao, validacoes de contrato e uma arquitetura facil de manter.
 
 ## Tecnologias
 
@@ -11,6 +11,7 @@ O objetivo e demonstrar uma estrategia objetiva de automacao de API, cobrindo fl
 - JUnit 5
 - Rest Assured
 - Hamcrest
+- JSON Schema Validator
 - Allure Reports
 - GitHub Actions
 
@@ -21,19 +22,27 @@ O objetivo e demonstrar uma estrategia objetiva de automacao de API, cobrindo fl
 |-- .github/workflows/tests.yml
 |-- pom.xml
 |-- README.md
-`-- src/test/java/com/sicredi/api
-    |-- base/BaseTest.java
-    |-- utils/AuthUtils.java
-    `-- tests
-        |-- AuthTest.java
-        |-- AuthProductsTest.java
-        |-- HealthCheckTest.java
-        |-- ProductByIdTest.java
-        |-- ProductsAddTest.java
-        |-- ProductsTest.java
-        |-- UserTest.java
-        `-- UsersTest.java
+`-- src/test
+    |-- java/com/sicredi/api
+    |   |-- base/BaseTest.java
+    |   |-- clients
+    |   |-- payloads
+    |   |-- specs/ApiSpecs.java
+    |   |-- tests
+    |   `-- utils/AuthUtils.java
+    `-- resources/schemas
 ```
+
+## Arquitetura da automacao
+
+O projeto foi organizado em camadas para separar responsabilidades:
+
+- `base`: configuracao comum da suite, como `base.url`.
+- `specs`: `RequestSpecification` e `ResponseSpecification` reutilizaveis.
+- `clients`: encapsulam as chamadas HTTP por dominio da API.
+- `payloads`: centralizam a construcao de massas de entrada.
+- `tests`: mantem apenas o comportamento esperado e as assercoes.
+- `resources/schemas`: contratos JSON Schema usados nas validacoes principais.
 
 ## Pre-requisitos
 
@@ -47,6 +56,20 @@ Executar todos os testes:
 
 ```bash
 mvn clean test
+```
+
+Executar apenas smoke tests:
+
+```bash
+mvn test -Dgroups=smoke
+```
+
+Executar apenas testes por dominio:
+
+```bash
+mvn test -Dgroups=auth
+mvn test -Dgroups=products
+mvn test -Dgroups=users
 ```
 
 Executar apontando para outra URL base:
@@ -82,15 +105,28 @@ Os resultados de execucao sao gerados em `target/allure-results` e nao sao versi
 | `GET /products/{id}` | Consulta produto existente e valida erro para produto inexistente |
 | `POST /products/add` | Cria produto e valida campos retornados |
 
+## Tags
+
+| Tag | Uso |
+| --- | --- |
+| `smoke` | Fluxos essenciais para feedback rapido |
+| `regression` | Fluxos complementares e negativos |
+| `auth` | Autenticacao e recursos protegidos |
+| `products` | Endpoints de produtos |
+| `users` | Endpoints de usuarios |
+| `health` | Disponibilidade da API |
+
 ## Boas praticas aplicadas
 
 - Reuso de configuracao comum em `BaseTest`.
+- Separacao entre specs, clients, payloads e testes.
 - Centralizacao de autenticacao em `AuthUtils`.
 - Base URL e credenciais configuraveis por propriedades Maven.
-- Validacoes objetivas de status code e campos relevantes do body.
+- Validacoes objetivas de status code, campos relevantes e contratos JSON Schema.
 - Testes negativos para autenticacao e acesso protegido.
+- Tags para execucao seletiva por risco, dominio e rapidez de feedback.
 - Sem token, resultados de teste ou arquivos de IDE versionados.
-- Pipeline de CI executando `mvn -B clean test` a cada push ou pull request na branch `main`.
+- Pipeline de CI executando smoke e regressao a cada push ou pull request na branch `main`.
 
 ## Observacoes sobre a API
 
