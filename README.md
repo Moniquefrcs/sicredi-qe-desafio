@@ -171,4 +171,4 @@ A DummyJSON e uma API publica de apoio a testes. Alguns comportamentos podem dif
 
 ## Autora
 
-Monique Fernandes Ribeiro C. S.
+Monique Fernandes Ribeiro Coutinho da Silva
