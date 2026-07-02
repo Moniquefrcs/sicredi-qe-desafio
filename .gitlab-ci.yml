@@ -1,0 +1,34 @@
+image: maven:3.9-eclipse-temurin-17
+
+stages:
+  - test
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+
+cache:
+  key: "$CI_COMMIT_REF_SLUG"
+  paths:
+    - .m2/repository
+
+smoke:
+  stage: test
+  script:
+    - mvn -B test -Dgroups=smoke
+  artifacts:
+    when: always
+    paths:
+      - target/surefire-reports
+      - target/allure-results
+    expire_in: 7 days
+
+regression:
+  stage: test
+  script:
+    - mvn -B clean test
+  artifacts:
+    when: always
+    paths:
+      - target/surefire-reports
+      - target/allure-results
+    expire_in: 7 days

@@ -14,12 +14,14 @@ O objetivo e demonstrar uma estrategia objetiva de automacao de API, cobrindo fl
 - JSON Schema Validator
 - Allure Reports
 - GitHub Actions
+- GitLab CI
 
 ## Estrutura
 
 ```text
 .
 |-- .github/workflows/tests.yml
+|-- .gitlab-ci.yml
 |-- pom.xml
 |-- README.md
 `-- src/test
@@ -105,6 +107,35 @@ Os resultados de execucao sao gerados em `target/allure-results` e nao sao versi
 | `GET /products/{id}` | Consulta produto existente e valida erro para produto inexistente |
 | `POST /products/add` | Cria produto e valida campos retornados |
 
+## Plano de teste e estrategia
+
+A estrategia prioriza endpoints criticos para o fluxo de negocio: disponibilidade da API, autenticacao, consulta de usuarios para credenciais, acesso autenticado a produtos e operacoes publicas de produtos.
+
+O plano combina:
+
+- Testes smoke para validar rapidamente os fluxos essenciais.
+- Testes de regressao para fluxos negativos e regras complementares.
+- Validacao de status code conforme comportamento real da API.
+- Validacao de campos relevantes para o negocio.
+- Validacao de contrato com JSON Schema nos retornos principais.
+- Separacao por dominio para facilitar manutencao e leitura tecnica.
+
+## Bugs e inconsistencias identificadas
+
+Durante a automacao foram identificadas diferencas entre a documentacao do desafio e o comportamento atual da API DummyJSON:
+
+- `POST /auth/login`: a documentacao informa `201 OK`, mas a API publica responde `200 OK`.
+- `POST /products/add`: a documentacao usa o campo `thumbnail` com a URL contendo `thumnail.jpg`, indicando um erro de digitacao no exemplo.
+- `GET /products/{id}`: a documentacao descreve `404 Not found` para id inexistente; a automacao aceita qualquer erro `4xx` para evitar falso negativo caso a API retorne outro codigo de cliente.
+- A API DummyJSON e publica e pode evoluir independentemente do desafio, entao as validacoes combinam contrato essencial com tolerancia controlada onde ha divergencia documentada.
+
+## Melhorias sugeridas
+
+- Corrigir exemplos da documentacao que possuem status code ou typo divergente do comportamento real.
+- Padronizar estrutura de erro para endpoints protegidos e recursos inexistentes.
+- Publicar uma especificacao OpenAPI versionada para reduzir ambiguidades nos contratos.
+- Definir massa de dados estavel para testes, evitando dependencia de dados publicos que podem mudar.
+
 ## Tags
 
 | Tag | Uso |
@@ -127,6 +158,10 @@ Os resultados de execucao sao gerados em `target/allure-results` e nao sao versi
 - Tags para execucao seletiva por risco, dominio e rapidez de feedback.
 - Sem token, resultados de teste ou arquivos de IDE versionados.
 - Pipeline de CI executando smoke e regressao a cada push ou pull request na branch `main`.
+
+## Entrega
+
+O enunciado oficial solicita entrega em repositorio privado no GitLab, com codigo e documentacao na branch `main`, alem do convite ao usuario indicado no portal do desafio. O projeto tambem possui GitHub Actions, mas o arquivo `.gitlab-ci.yml` foi incluido para atender diretamente ao formato solicitado.
 
 ## Observacoes sobre a API
 
